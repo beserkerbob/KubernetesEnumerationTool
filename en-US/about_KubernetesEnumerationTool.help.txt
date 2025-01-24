@@ -1,0 +1,65 @@
+<#
+
+.Description
+This project has different kinds of actions which can be performed
+It can perform different actions based upon your own access rights in kubeconfig or based on a  provide token
+These actions can be:
+    enumerating networkpolicies of the cluster (can we communicatie outside or are interal pod communication restricted)
+    Enumerating authorizations, Checks if you can exec in pods for service accounts."
+    Enumerating serviceaccounts permissions
+    Enumerating possible extra implemented polcies (Now only supporting gatekeeper)
+    Enumerating GeneralInfo from with in the cluster for interestinf information
+    Enumerating RBAC rights who as access to what
+    Trying to retrieve metdata information from within a pod
+    Enumerating secrets for every namespace and trying to find access tokens.
+
+.Parameter token 
+An optional bearer token which can be provided to perform some actions as another user
+
+.Parameter subCommand  
+An Mandatory parameter which specifies which action should be performed. 
+Possible actions are: 
+    networkpolicy
+    authorization -serviceAccount <name>      - (Optional) Specify a service account name for authorization checks."
+                                                (Default) uses your own privileges" 
+                                                Use 'all' to check all service accounts."
+                                                Specify a specific user account like system:serviceaccount:<namspace>:<name>"
+    serviceaccountpermissions
+    policies
+    generalInfo -filename <name>              - (Required) Specify filename where the results are stored."
+    Get-RBAC
+    getMetaData
+    getSecrets
+It forces to only allow these options you can use ctrl + spacebar to view the options and iterate over them
+
+.Parameter serviceAccount 
+An optional parameter which by default is for itself only possible for the authorization sub command
+
+.Parameter filename
+An required parameter for the generalInfo subcommand but for all others optional or not supported
+
+.Parameter namespace
+An optional parameter which helps specify on which namespace you want to perform the given actions
+By default it will try to perform the actions on every individual namespace.
+
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 Get-RBAC -token eyJEJdaoihwdajcaw<snip>
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 authorization -serviceAccount all
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 networkpolicy
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 serviceaccountpermissions
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 policies
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 generalInfo -fileName data.txt
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 getMetaData -token eyJ<snip>
+.EXAMPLE
+PS> .\KubernetesEnumerationTool.ps1 getSecrets -token eyJ<snip>
+
+.SYNOPSIS
+Used to determine where files should be deployed.
+
+#>
