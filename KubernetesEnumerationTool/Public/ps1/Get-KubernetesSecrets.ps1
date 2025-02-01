@@ -38,27 +38,38 @@ Function Get-KubernetesSecrets{
         [Parameter(Mandatory = $false)]
         [string]$givenNamespace
     )
-    if([string]::IsNullOrEmpty($Givenamespace)){
-        Write-Host "Trying to retrieve all secrets from all namespaces"
-        $GetSecrets = Perform-KubectlCommand -action "get" -type "secrets" -extracommand '-A -o wide' -token $token 
+    # Check if a specific namespace is provided
+    if ([string]::IsNullOrEmpty($givenNamespace)) {
+        Write-Host "Trying to retrieve all secrets across all namespaces"
+        $extraCommand = '-A -o wide'
+    } else {
+        Write-Host "Trying to retrieve all secrets from the namespace $givenNamespace"
+        $extraCommand = "-n $givenNamespace -o wide"
     }
-    else{
-        Write-Host "Trying to retrieve all secrets from the namespace $Givenamespace"
-        $GetSecrets = Perform-KubectlCommand -action "get" -type "secrets" -namespace $Givenamespace -extracommand '-o wide' -token $token 
+
+    # Determine if a token is provided and construct the Kubectl command accordingly
+    $hasToken = $PSBoundParameters.ContainsKey('token') -and $token
+    $GetSecrets = Perform-KubectlCommand -Action "get" -Type "secrets" -ExtraCommand $extraCommand
+
+    if ($hasToken) {
+        $GetSecrets += " -Token $token"
     }
+
+    # Execute the command to get secrets
+    Invoke-Expression $GetSecrets
     if ([string]::IsNullOrEmpty($GetSecrets) -and [string]::IsNullOrEmpty($givenNamespace)) {
         Write-Host "No permissions to retrieve all secrets for all namespaces or from provided namespace" -ForegroundColor Red 
         $namespacesArray = Get-NameSpaceArray
         foreach ($namespace in $namespacesArray) {
-            performGetSecretsCommand -token $token -givenNamespace $namespace
+            Perform-KubectlGetSecretsCommand -token $token -givenNamespace $namespace
         }
     }
     if ([string]::IsNullOrEmpty($GetSecrets)){
-        performGetSecretsCommand -token $token -givenNamespace $givenNamespace
+        Perform-KubectlGetSecretsCommand -token $token -givenNamespace $givenNamespace
     }
     else{
         Write-Host "We have permissions to list all secrets listing content below"
         $GetSecrets
-        SearchingSecrets -token $token -allNameSpaces "yes"
+        Perform-SearchSecrets -token $token -allNameSpaces "yes"
     }
 }

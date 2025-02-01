@@ -49,7 +49,7 @@ function Perform-KubectlExecCommand {
         [Parameter(Mandatory = $true)]
         [Alias('c')]
         [string]$command,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [Alias('t')]
         [string]$accesstoken
     )

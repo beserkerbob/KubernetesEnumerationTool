@@ -1,5 +1,3 @@
-powershell
-
 <#
 .SYNOPSIS
    Automates the creation of a Kubernetes service account, role, and role binding within a specified namespace. Which have all rights for that specific namespace
@@ -41,8 +39,13 @@ Function CreateMasterServiceAccount {
     )
 
     if($PSCmdlet.ShouldProcess("$namespace")){
-         # When we have rolebinding service account creations and rolerights
-
+        # Retrieve the list of namespaces
+        $namespaceArray = Get-NameSpaceArray
+        # Check if the namespace exists in the array
+        if (-not ($namespace -in $namespaceArray)) {
+            Write-Host "Namespace '$namespace' does not exist. Stopping process"
+            return
+        }
         # Ask for the necessary details
         $role = Read-Host -Prompt "Please provide the role name"
         $serviceAccountName = Read-Host -Prompt "Please provide the service account name"
@@ -52,14 +55,15 @@ Function CreateMasterServiceAccount {
         Write-Output "Role: $role"
         Write-Output "Service Account Name: $serviceAccountName"
         Write-Output "Role Binding Name: $roleBindingName"
-        Perform-KubectlCommand -action "create" -type "sa " -namespace $namespace -extracommand "${serviceAccountName}" -token $access_token 
-        Perform-KubectlCommand -action "create" -type "role " -namespace $namespace -extracommand "${role} --verb=* --resource=*" -token $access_token 
-        Perform-KubectlCommand -action "create" -type "rolebinding " -namespace $namespace -extracommand "${roleBindingName} --role=${role} --serviceaccount=${namespace}:${serviceAccountName}" -token $access_token 
+        Write-Output "For namespace: $namespace"
+        Perform-KubectlCommand -Action "create" -Type "sa" -Namespace $namespace -ExtraCommand "${serviceAccountName}" -Token $access_token 
+        Perform-KubectlCommand -Action "create" -type "role" -namespace $namespace -extracommand "${role} --verb=* --resource=*" -token $access_token 
+        Perform-KubectlCommand -Action "create" -type "rolebinding" -namespace $namespace -extracommand "${roleBindingName} --role=${role} --serviceaccount=${namespace}:${serviceAccountName}" -token $access_token 
         
         Write-Output "Tried all creating function"
-        $getCreatedSa = Perform-KubectlCommand -action "get" -type "sa " -namespace $namespace -extracommand "${serviceAccountName}" -token $access_token 
-        $getCreatedSa = Perform-KubectlCommand -action "get" -type "role " -namespace $namespace -extracommand "${role}" -token $access_token 
-        $getCreatedSa = Perform-KubectlCommand -action "get" -type "rolebinding " -namespace $namespace -extracommand "${roleBindingName}" -token $access_token 
+        $getCreatedSa = Perform-KubectlCommand -Action "get" -type "sa" -namespace $namespace -extracommand "${serviceAccountName}" -token $access_token 
+        $getCreatedRole = Perform-KubectlCommand -Action "get" -type "role" -namespace $namespace -extracommand "${role}" -token $access_token 
+        $getCreatedRoleBinding = Perform-KubectlCommand -Action "get" -type "rolebinding" -namespace $namespace -extracommand "${roleBindingName}" -token $access_token 
 
         if ([string]::IsNullOrEmpty($getCreatedSa)) {
             Write-Host "Something went wrong while creating the Service account " -ForegroundColor Red

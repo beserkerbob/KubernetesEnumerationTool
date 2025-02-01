@@ -38,7 +38,7 @@ function Perform-KubectlCommand {
     [CmdletBinding()]
     param (
         [Parameter( Mandatory = $true)]
-        [alias("T")]
+        [alias("Ty")]
         [string]$Type,
         [Parameter(Mandatory = $true)]
         [alias("A")]
@@ -56,21 +56,21 @@ function Perform-KubectlCommand {
 
         # Split extracommand into an array of arguments.
 
-    $commandArgs = $extracommand -split ' '
-    if ([string]::IsNullOrEmpty($token) -and [string]::IsNullOrEmpty($namespace)) {
+    $commandArgs = $ExtraCommand -split ' '
+    if ([string]::IsNullOrEmpty($Token) -and [string]::IsNullOrEmpty($Namespace)) {
         Write-Host trying to retrieve information without token permissions
-        return kubectl $action $type @commandArgs  2>$null  
+        return kubectl $Action $Type @commandArgs  2>$null  
     } 
-    elseif ([string]::IsNullOrEmpty($token)) {
+    elseif ([string]::IsNullOrEmpty($Token)) {
         Write-Host trying to retrieve information without token permissions
-        return kubectl $action $type -n $namespace @commandArgs  2>$null  
+        return kubectl $Action $Type -n $Namespace @commandArgs  
     }
-    elseif ([string]::IsNullOrEmpty($namespace)) {
+    elseif ([string]::IsNullOrEmpty($Namespace)) {
         Write-Host trying to retrieve information with token without a specified namespace
-        return kubectl $action $type @commandArgs --token $token 2>$null 
+        return kubectl $Action $Type @commandArgs --token $Token 2>$null 
     }
     else {
         Write-Debug Command arguments $($commandArgs -join ', ')
-        return kubectl $action $type -n $namespace @commandArgs --token $token 2>$null 
+        return kubectl $Action $Type -n $Namespace @commandArgs --token $Token 2>$null 
     }
 }

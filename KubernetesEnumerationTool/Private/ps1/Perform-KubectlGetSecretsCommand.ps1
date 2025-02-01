@@ -39,12 +39,12 @@ Function Perform-KubectlGetSecretsCommand{
         [Parameter(Mandatory = $false)]
         [string]$givenNamespace
     )
-    $secretNamespace = Perform-KubectlCommand  -action "get" -type "secrets" -namespace $givenNamespace -extracommand '-o wide' -token $token 
+    $secretNamespace = Perform-KubectlCommand -Action "get" -type "secrets" -namespace $givenNamespace -extracommand '-o wide' -token $token 
     if ([string]::IsNullOrEmpty($secretNamespace)) {
             Write-Host "No permissions to retrieve secrets on $givenNamespace" -ForegroundColor Red 
             continue
     }
     Write-Host "Found the following secrets for $givenNamespace" -ForegroundColor Green
     $secretNamespace
-    SearchingSecrets -token $token -givenNamespace $givenNamespace -allNameSpaces "no"
+    Perform-SearchSecrets -token $token -givenNamespace $givenNamespace -allNameSpaces "no"
 }

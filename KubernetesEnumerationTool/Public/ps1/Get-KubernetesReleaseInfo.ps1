@@ -30,7 +30,7 @@ function Get-KubernetesReleaseInfo{
     $currentVersionKubernetes = kubectl version -o json | ConvertFrom-Json
     Write-Host "The current kubernetes version is: $($currentVersionKubernetes.ServerVersion.gitVersion)"
     
-    Write-Host"Do you want to retrieve information from Azure or Kubernetes releases Need to write that still"
+    Write-Host "Do you want to retrieve information from Azure or Kubernetes releases Need to write that still"
 
     # Retrieve Latest Kubernetes Releases
     $releases = Invoke-RestMethod -Uri 'https://api.github.com/repos/kubernetes/kubernetes/releases' -UseBasicParsing

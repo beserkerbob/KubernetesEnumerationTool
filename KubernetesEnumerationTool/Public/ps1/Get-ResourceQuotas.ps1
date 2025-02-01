@@ -46,11 +46,15 @@ Function Get-ResourceQuotas{
         [Parameter(Mandatory = $false)]
         [String] $givenNamespace
     ) 
+   # Array to hold the results
+   $namespaceQuotaReport = @()
+        # A custom object to store the results per namespace
     if(-not [string]::IsNullOrEmpty($givenNamespace)){
         
         if(Get-CanIExecuteInNamespace -token $token -namespace $givenNamespace -command "get ResourceQuota"){
-            AnalyzeResourceQuotas -givenNamespace $givenNamespace
-            continue;
+            $namespaceQuotaReport =  AnalyzeResourceQuotas -givenNamespace $givenNamespace
+            $namespaceQuotaReport | Format-Table -Property Namespace, LimitsSetForMemory, LimitsSetForCPU, LimitsSetForPods -AutoSize
+            return;
         }
         else{
             Write-Host "You have no permissions to list resourcequotas in namespace: $givenNamespace" -ForegroundColor Red
@@ -58,12 +62,16 @@ Function Get-ResourceQuotas{
     }
 
     $namespacesArray = Get-NameSpaceArray
+
     foreach ($ns in $namespacesArray) {
         if(Get-CanIExecuteInNamespace -token $token -namespace $ns -command "get ResourceQuota"){
-            AnalyzeResourceQuotas -givenNamespace $ns -token $token
+            $namespaceQuotaReport += AnalyzeResourceQuotas -givenNamespace $ns -token $token
+
         }
         else{
             Write-Host "You have no permissions to list resourcequotas in namespace: $ns" -ForegroundColor Red
         }
     }
+    $namespaceQuotaReport | Format-Table -Property Namespace, LimitsSetForMemory, LimitsSetForCPU, LimitsSetForPods -AutoSize
+
 }

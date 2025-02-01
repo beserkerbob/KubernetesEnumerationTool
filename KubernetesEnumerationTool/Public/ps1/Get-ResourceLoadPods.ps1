@@ -50,10 +50,10 @@ param(
 
     if([string]::IsNullOrEmpty($namespace)){
         Write-host "Trying to retrieve resource information for everypod in all namespaces"
-        if(Can-I-ExecuteInNamespace -token $accesstoken -command "top pod" -allNamespaces $true){
+        if(Get-CanIExecuteInNamespace -token $accesstoken -command "top pod" -allNamespaces $true){
             Write-host "Allowed to retrieve all pod information from tokens"
             $resourcesUsedNamespace = Perform-KubectlCommand -action "top" -type "pod" -token $accesstoken -namespace $namespace -extracommand "--containers=true --sort-by=memory -A" 
-            $resourcesUsedNamespace = Perform-KubectlCommand -action "top" -type "pod" -token $accesstoken -namespace $namespace -extracommand "--containers=true --sort-by=memory -A" 
+            $resourcesUsedNamespace | Format-Table -Property Name, CPU, Memory
         }
         if([string]::IsNullOrEmpty($resourcesUsedNamespace)){
             Write-Host "Wasn't able to retrieve resource information for everypod"

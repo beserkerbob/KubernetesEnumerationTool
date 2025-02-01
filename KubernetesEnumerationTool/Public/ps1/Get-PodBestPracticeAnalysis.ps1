@@ -46,7 +46,7 @@ Function Get-PodBestPracticeAnalysis{
     if(-not [string]::IsNullOrEmpty($givenNamespace)){
         
         # Get all pods in all namespaces with their owner references
-        $pods = Perform-KubectlCommand  -action "get" -type "pods" -namespace $givenNamespace -extracommand '-o json' -token $token 
+        $pods = Perform-KubectlCommand -action "get" -type "pods" -namespace $givenNamespace -extracommand '-o json' -token $token 
         if([string]::IsNullOrEmpty($pods)){
             Write-Host "You have no permissions to retrieve pod information for the namespace: $givenNamespace" -ForegroundColor Red
         }
@@ -62,7 +62,7 @@ Function Get-PodBestPracticeAnalysis{
     }
     else{
         $kubectlObject = $pods | ConvertFrom-Json
-        AnalyzingOrphanedPods -KubectlObject $kubectlObject
+        AnalyzePodSecurityAndBestpractices -KubectlObject $kubectlObject
         continue;
     }
     $namespacesArray = Get-NameSpaceArray
@@ -70,7 +70,7 @@ Function Get-PodBestPracticeAnalysis{
         if(Get-CanIExecuteInNamespace -token $token -namespace $ns -command "get pods"){
             $pods = Perform-KubectlCommand -action "get" -type "pods" -namespace $ns -extracommand '-o json' -token $token
             $kubectlObject = $pods | ConvertFrom-Json
-            AnalyzingOrphanedPods -KubectlObject $kubectlObject
+            AnalyzePodSecurityAndBestpractices -KubectlObject $kubectlObject
 
         }
         else{

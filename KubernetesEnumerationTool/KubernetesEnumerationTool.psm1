@@ -9,7 +9,14 @@ $currentManifest = Test-ModuleManifest $moduleManifest
 $aliases = @()
 $publicFunctions = Get-ChildItem -Path $publicFunctionsPath | Where-Object {$_.Extension -eq '.ps1'}
 $privateFunctions = Get-ChildItem -Path $privateFunctionsPath | Where-Object {$_.Extension -eq '.ps1'}
-$publicFunctions | ForEach-Object { . $_.FullName }
+$publicFunctions | ForEach-Object { 
+    try {
+        Write-Verbose "Dot-sourcing $($_.FullName)"
+        . $_.FullName
+    } catch {
+        Write-Error "Error sourcing $($_.FullName): $_"
+    }
+}
 $privateFunctions | ForEach-Object { . $_.FullName }
 #$classes | ForEach-Object { . $_.FullName }
 

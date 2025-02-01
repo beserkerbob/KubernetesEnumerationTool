@@ -60,13 +60,13 @@ function Get-RBAC {
      
     Write-Host "Trying to retrieve RBAC information from the kubernetes cluster for all namespaces"
     Write-Host "First trying to Retrieve rolebindings and clusterroleBindings"
-    $rbacAllNamespaces = Perform-KubectlCommand -action "get" -type "rolebindings,clusterrolebindings" -accesstoken $accesstoken -extracommand "-A -o wide"
+    $rbacAllNamespaces = Perform-KubectlCommand -action "get" -type "rolebindings,clusterrolebindings" -Token $accesstoken -extracommand "-A -o wide"
     if ([string]::IsNullOrEmpty($rbacAllNamespaces)) {
         Write-Host "No permissions to perform RBAC on all namespaced" -ForegroundColor Red 
         Write-Host "Performing rolebindings request for each namespace"
         $namespacesArray = Get-NameSpaceArray
         foreach ($namespace in $namespacesArray) {
-            $rbacNamespace = Perform-KubectlCommand -action "get" -type "rolebindings" -namespace $namespace -accesstoken $accesstoken -extracommand "-o wide"
+            $rbacNamespace = Perform-KubectlCommand -action "get" -type "rolebindings" -namespace $namespace -Token $accesstoken -extracommand "-o wide"
             if ([string]::IsNullOrEmpty($rbacNamespace)) {
                     Write-Host "No permissions to retrieve rolebindings on $namespace" -ForegroundColor Red 
                     continue
@@ -74,14 +74,14 @@ function Get-RBAC {
             Write-Host "Found the following role bindings for $namespace" -ForegroundColor Green
             $rbacNamespace
             Write-Host "Trying to retrieve more information for each Role"
-            $rbacJsonNamespace = Perform-KubectlCommand -action "get" -type "rolebindings" -namespace $namespace -accesstoken $accesstoken -extracommand "-o json"
+            $rbacJsonNamespace = Perform-KubectlCommand -action "get" -type "rolebindings" -namespace $namespace -Token $accesstoken -extracommand "-o json"
             $rbacRolesOverview = $rbacJsonNamespace | jq '[.items[] | {type: .roleRef.kind, Name: .roleRef.name}]' | ConvertFrom-Json 2>$null
             foreach ($Role in $rbacRolesOverview) {
                 # Accessing the 'type' property directly from the hashtable object
                 # Make sure the object is parsed correctly
                 if ($Role -is [PSCustomObject] -or $Role.PSTypeNames -contains 'PSCustomObject') {
                     if (![string]::IsNullOrEmpty($Role.type)) {
-                        DescribeInformation -roleType $Role.type -roleName $Role.name -accesstoken $accesstoken
+                        DescribeInformation -roleType $Role.type -roleName $Role.name -Token $accesstoken
                     } 
                     else {
                         Write-Host "Error: RoleType is empty or not found"
@@ -99,7 +99,7 @@ function Get-RBAC {
         $rbacAllNamespaces
     }
     Write-Host "Trying to retrieve clusterroles"
-    $rbacClusterRoles = Perform-KubectlCommand -action "get" -type "clusterroles"-accesstoken $accesstoken
+    $rbacClusterRoles = Perform-KubectlCommand -action "get" -type "clusterroles" -Token $accesstoken
     if ([string]::IsNullOrEmpty($rbacAllNamespaces)) {
         Write-Host "No permissions to retrieve clusteroles on all namespaces" -ForegroundColor Red
     }
@@ -109,21 +109,21 @@ function Get-RBAC {
         $rbacClusterRoles
     }
     Write-Host "Trying to retrieve roles For all namespaces"
-    $rbacRoles =  Perform-KubectlCommand -action "get" -type "roles"-accesstoken $accesstoken
+    $rbacRoles =  Perform-KubectlCommand -action "get" -type "roles" -Token $accesstoken
     if ([string]::IsNullOrEmpty($rbacAllNamespaces)) {
         Write-Host "No permissions to retrieve roles on all namespaces" -ForegroundColor Red
         $namespacesArray = Get-NameSpaceArray
         foreach ($namespace in $namespacesArray) {
-            $roleNamespace =  Perform-KubectlCommand -action "get" -type "roles" -namespace $namespace -extracommand "-o wide" -accesstoken $accesstoken
+            $roleNamespace =  Perform-KubectlCommand -action "get" -type "roles" -namespace $namespace -extracommand "-o wide" -Token $accesstoken
             if ([string]::IsNullOrEmpty($roleNamespace)) {
                     Write-Host "No permissions to retrieve role on $namespace" -ForegroundColor Red 
                     continue
             }
             Write-Host "Found at least 1 role for $namespace. The names are:" -ForegroundColor Green
-            $roleNames = Perform-KubectlCommand -action "get" -type "roles" -namespace $namespace -extracommand "-o wide" -accesstoken $accesstoken | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s+')[0]}
+            $roleNames = Perform-KubectlCommand -action "get" -type "roles" -namespace $namespace -extracommand "-o wide" -Token $accesstoken | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s+')[0]}
             Write-Host "Trying  to retrieve additional information for this role"
             foreach($role in $roleNames){
-               $roleDescription =  DescribeInformation -roleType "role" -roleName $role -n $namespace -accesstoken $accesstoken 2>$null
+               $roleDescription =  DescribeInformation -roleType "role" -roleName $role -n $namespace -Token $accesstoken 2>$null
                if ([string]::IsNullOrEmpty($roleDescription)) {
                     Write-Host "No permissions to describe the role with name: $role in $namespace" -ForegroundColor Red 
                     continue

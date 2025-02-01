@@ -47,6 +47,15 @@ Function AnalyzeResourceQuotas{
     # else{
     #     $data = Perform-KubectlCommand -type "quota" -namespace $givenNamespace -extracommand '-A -o jsonpath="{.items[*].spec.hard}"' -token $token 
     # }
+
+     # A custom object to store the results per namespace
+     $namespaceQuotaReport = [PSCustomObject]@{
+        Namespace     = $givenNamespace
+        LimitsSetForMemory     = $true
+        LimitsSetForCpu     = $true
+        LimitsSetForPods     = $true
+    }
+
     Write-Host "The hard specifications are:"
     Write-Host $data
     Write-Host "performing further analysis"
@@ -55,12 +64,16 @@ Function AnalyzeResourceQuotas{
     # Check if 'pods' is present
     if ([string]::IsNullOrEmpty($jsonObject.pods)) {
         Write-Host "There is no limit on the amount of pods in namespace: $givenNamespace"-ForegroundColor Red
+        $namespaceQuotaReport.LimitsSetForPods = $false
     }
     if([string]::IsNullOrEmpty($($jsonObject.'limits.cpu'))){
         Write-Host "There is no limit on the CPU in namespace: $givenNamespace"-ForegroundColor Red
+        $namespaceQuotaReport.LimitsSetForCpu = $false
+
     }
     if([string]::IsNullOrEmpty($($jsonObject.'limits.memory'))){
         Write-Host "There is no limit on the CPU in namespace: $givenNamespace "-ForegroundColor Red
+        $namespaceQuotaReport.LimitsSetForMemory = $false
     }
     if (
         -not [string]::IsNullOrEmpty($jsonObject.pods) -and
@@ -78,4 +91,5 @@ Function AnalyzeResourceQuotas{
     else{
         Write-Host "There is not a limit on pods and cpu and memory in namespace: $givenNamespace This is could be Improved " -ForegroundColor Red
     }
+    return $namespaceQuotaReport
 }

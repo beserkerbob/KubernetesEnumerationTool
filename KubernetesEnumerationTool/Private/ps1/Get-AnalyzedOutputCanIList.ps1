@@ -42,43 +42,39 @@ Function Get-AnalyzedOutputCanIList{
     $role = $false
     $serviceAccount = $false
     $CanIListOutput | ForEach-Object {
-        # Skip the header line
-        if ($_ -notmatch '^Resources') {
-            # Use regex to capture the verbs enclosed in the third set of brackets
-            if ($_ -match '^\S+\s+\[\]\s+\[\]\s+\[(.*?)\]$') {
-                $verbs = $matches[1] -split '\s+'
-    
-                # Check if verbs contain *, create, impersonate, or delete
-                if ($verbs -contains '*' -or $verbs -contains 'create' -or $verbs -contains 'impersonate' -or $verbs -contains 'delete' -or
-                    $verbs -contains 'update'  -or $verbs -contains 'patch') {
-                    # Output the entire line if the conditions are met
-                    if( $_ -match 'serviceaccounts' -or
-                        $_ -match 'roles.rbac.authorization.k8s.io' -or
-                        $_ -match "rolebindings.rbac.authorization.k8s.io" -or
-                        $_ -match "azurekeyvaultsecrets.spv.no" -or
-                        $_ -match "networkpolicies" -or
-                        $_ -match "secrets"){
-                        Write-Host $_ -ForegroundColor Green
-                    }
-                    if( $_ -match "rolebindings.rbac.authorization.k8s.io"){
-                        $rolebinding = $true
-                    }
-                    if($_ -match 'roles.rbac.authorization.k8s.io'){
-                        $role = $true
-                    }
-                    if($_ -match 'serviceaccounts' ){
-                        $serviceAccount = $true  
-                    }
-                    else{
-                        Write-Host $_ -ForegroundColor Yellow
-                    }
-                }
-
+        # Assuming $entry.Verbs is a string in the format: "[verb1 verb2 verb3]", convert it to an array
+        $verbs = $_.Verbs -replace '^\[|\]$', '' -split '\s+'
+        # Check if verbs contain *, create, impersonate, or delete
+        if ($verbs -contains '*' -or $verbs -contains 'create' -or $verbs -contains 'impersonate' -or $verbs -contains 'delete' -or
+            $verbs -contains 'update'  -or $verbs -contains 'patch') {
+            # Output the entire line if the conditions are met
+            if( $_.Resources -contains 'serviceaccounts' -or
+                $_.Resources -contains 'roles.rbac.authorization.k8s.io' -or
+                $_.Resources -contains "rolebindings.rbac.authorization.k8s.io" -or
+                $_.Resources -contains "azurekeyvaultsecrets.spv.no" -or
+                $_.Resources -contains "networkpolicies" -or
+                $_.Resources -contains "*" -or
+                $_.Resources -contains "secrets"){
+                Write-Host $_ -ForegroundColor Green
             }
+            else{
+                Write-Host $_ -ForegroundColor Yellow
+            }
+            if( $_.Resources -contains "rolebindings.rbac.authorization.k8s.io"){
+                $rolebinding = $true
+            }
+            if($_.Resources -contains 'roles.rbac.authorization.k8s.io'){
+                $role = $true
+            }
+            if($_.Resources -contains 'serviceaccounts' ){
+                $serviceAccount = $true  
+            }
+
         }
-        
+
     }
+        
     if($serviceAccount -eq $true -and $role -eq $true -and $rolebinding -eq $true -and $DoICreateMasterServiceAccount -eq $true){
-        CreateMasterServiceAccount -n $namespace -access_token
+        CreateMasterServiceAccount -n $namespace -access_token $access_token
     }
 }
