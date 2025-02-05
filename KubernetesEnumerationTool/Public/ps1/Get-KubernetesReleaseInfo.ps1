@@ -27,6 +27,11 @@ This command fetches the current Kubernetes server version and displays any newe
 #>
 
 function Get-KubernetesReleaseInfo{
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
+
     $currentVersionKubernetes = kubectl version -o json | ConvertFrom-Json
     Write-Host "The current kubernetes version is: $($currentVersionKubernetes.ServerVersion.gitVersion)"
     

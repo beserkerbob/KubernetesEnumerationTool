@@ -7,7 +7,10 @@ param(
     [Alias("t")]
     [String] $accesstoken
     )
-
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
     $nodeImages = @()
 
     $ImageMetaData = @()

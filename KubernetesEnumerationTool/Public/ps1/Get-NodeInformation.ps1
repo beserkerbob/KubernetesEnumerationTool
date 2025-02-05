@@ -23,51 +23,55 @@ This command runs `Get-NodeInformation`, extracting and displaying specific anno
 
 #>
 function Get-NodeInformation{
-    # Run `kubectl describe nodes` and capture the output
-$nodesDescription = kubectl describe nodes
-
-# Initialize an array to store relevant information
-$extractedInfo = @()
-
-# Boolean flag to track the allocated resources section
-$inAllocatedResourcesSection = $false
-
-foreach ($line in $nodesDescription) {
-    # Extract specific annotations
-    if ($line -match "topology.kubernetes.io/zone=" -or
-        $line -match "kubernetes.azure.com/storagetier=" -or
-        $line -match "kubernetes.azure.com/node-image-version=" -or
-        $line -match "kubernetes.azure.com/network-policy=" -or
-        $line -match "kubernetes.azure.com/cluster=" -or
-        $line -match "beta.kubernetes.io/instance-type=" -or
-        $line -match "beta.kubernetes.io/os=" -or
-        $line -match "kubernetes.azure.com/mode=" -or
-        $line -match "kubernetes.io/hostname=" -or
-        $line -match "Kernel Version" -or
-        $line -match "OS Image") 
-            {
-        $extractedInfo += $line.Trim()
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
     }
-    # Check for the start of the "Allocated resources" section
-    if ($line -match "Allocated resources:") {
-        $inAllocatedResourcesSection = $true
-        $extractedInfo += $line.Trim()
-        continue
-    }
+        # Run `kubectl describe nodes` and capture the output
+    $nodesDescription = kubectl describe nodes
 
-    # Capture the content of the Allocated resources section
-    if ($inAllocatedResourcesSection) {
-        if ($line.Trim() -eq "") {
-            # End the section on a blank line
-            $inAllocatedResourcesSection = $false
-        } else {
+    # Initialize an array to store relevant information
+    $extractedInfo = @()
+
+    # Boolean flag to track the allocated resources section
+    $inAllocatedResourcesSection = $false
+
+    foreach ($line in $nodesDescription) {
+        # Extract specific annotations
+        if ($line -match "topology.kubernetes.io/zone=" -or
+            $line -match "kubernetes.azure.com/storagetier=" -or
+            $line -match "kubernetes.azure.com/node-image-version=" -or
+            $line -match "kubernetes.azure.com/network-policy=" -or
+            $line -match "kubernetes.azure.com/cluster=" -or
+            $line -match "beta.kubernetes.io/instance-type=" -or
+            $line -match "beta.kubernetes.io/os=" -or
+            $line -match "kubernetes.azure.com/mode=" -or
+            $line -match "kubernetes.io/hostname=" -or
+            $line -match "Kernel Version" -or
+            $line -match "OS Image") 
+                {
             $extractedInfo += $line.Trim()
         }
-    }
-}
+        # Check for the start of the "Allocated resources" section
+        if ($line -match "Allocated resources:") {
+            $inAllocatedResourcesSection = $true
+            $extractedInfo += $line.Trim()
+            continue
+        }
 
-# Output the extracted information
-Write-Host ""
-Write-Host ""
-$extractedInfo | ForEach-Object { Write-Output $_ }
+        # Capture the content of the Allocated resources section
+        if ($inAllocatedResourcesSection) {
+            if ($line.Trim() -eq "") {
+                # End the section on a blank line
+                $inAllocatedResourcesSection = $false
+            } else {
+                $extractedInfo += $line.Trim()
+            }
+        }
+    }
+
+    # Output the extracted information
+    Write-Host ""
+    Write-Host ""
+    $extractedInfo | ForEach-Object { Write-Output $_ }
 }

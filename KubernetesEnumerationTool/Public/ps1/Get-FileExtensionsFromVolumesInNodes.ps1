@@ -53,7 +53,10 @@ function Get-FileExtensionsFromVolumesInNodes {
         [ValidateSet("debugNode", "hostpid")]
         [string]$method
     )
-
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
     # Set base kubectl debug command
     if($method -eq "debugNode"){
         $baseCommand = "kubectl debug node/$nodeName -it -q --image=ubuntu"

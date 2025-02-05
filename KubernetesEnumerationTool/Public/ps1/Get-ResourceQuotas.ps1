@@ -46,6 +46,11 @@ Function Get-ResourceQuotas{
         [Parameter(Mandatory = $false)]
         [String] $givenNamespace
     ) 
+
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
    # Array to hold the results
    $namespaceQuotaReport = @()
         # A custom object to store the results per namespace

@@ -30,6 +30,10 @@ Function Get-MetaDataInformation{
         [Alias("t")]
         [string]$accesstoken
     )
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
     Write-Output "Trying to retrieve sensitive metadata information"
     $namespacesArray = Get-NameSpaceArray
     foreach ($namespace in $namespacesArray) {

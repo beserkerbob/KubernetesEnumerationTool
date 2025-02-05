@@ -42,7 +42,10 @@ Function Get-PodBestPracticeAnalysis{
         [Parameter(Mandatory = $false)]
         [String] $givenNamespace
     ) 
-
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
     if(-not [string]::IsNullOrEmpty($givenNamespace)){
         
         # Get all pods in all namespaces with their owner references

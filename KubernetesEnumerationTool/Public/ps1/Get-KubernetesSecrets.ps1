@@ -38,6 +38,11 @@ Function Get-KubernetesSecrets{
         [Parameter(Mandatory = $false)]
         [string]$givenNamespace
     )
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
+
     # Check if a specific namespace is provided
     if ([string]::IsNullOrEmpty($givenNamespace)) {
         Write-Host "Trying to retrieve all secrets across all namespaces"

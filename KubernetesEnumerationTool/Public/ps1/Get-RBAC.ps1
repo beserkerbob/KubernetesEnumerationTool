@@ -57,6 +57,10 @@ function Get-RBAC {
         Write-Host "For this to work jq is required can be installed from https://jqlang.github.io/jq/download/ "
         exit 1
      }
+         # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
      
     Write-Host "Trying to retrieve RBAC information from the kubernetes cluster for all namespaces"
     Write-Host "First trying to Retrieve rolebindings and clusterroleBindings"

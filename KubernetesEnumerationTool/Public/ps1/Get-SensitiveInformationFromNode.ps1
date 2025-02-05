@@ -45,6 +45,11 @@ function Get-SensitiveInformationFromNode{
         [Parameter(Mandatory = $false)]
         [string[]]$extensions = @()  # Initialize as an empty array by default
     )
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
+
     if($PSCmdlet.ShouldProcess("clusterNode")){
         Write-Host "Trying different techniques to give you an edge on the system. This can be invasive"
         Write-Host "First verifing if you have rights to debug an node to maby exploit the complete node and retrieve some valuable information"

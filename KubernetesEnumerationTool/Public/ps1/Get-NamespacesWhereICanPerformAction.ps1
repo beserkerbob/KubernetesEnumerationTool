@@ -27,9 +27,8 @@ function Get-NamespacesWhereICanPerformAction {
         $Action = "get"
     }
     # Ensure kubectl is available
-    if ((Get-Command kubectl -ErrorAction SilentlyContinue) -eq $null) {
-        Write-Error "kubectl is not installed or not in your PATH."
-        return
+    if (Test-KubectlInstalledInPath) {
+        exit
     }
 
     # Get all namespaces

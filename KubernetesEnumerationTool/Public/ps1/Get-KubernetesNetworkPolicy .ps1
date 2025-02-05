@@ -46,6 +46,10 @@ function Get-KubernetesNetworkPolicy {
         [Alias("t")]
         [String] $accesstoken
     )
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
     $networkPolicies = Perform-KubectlCommand -action "get" -type "networkpolicy" -extracommand '-o json' -token $accesstoken 
     Write-Host "We found:" -ForegroundColor Yellow -NoNewline
 

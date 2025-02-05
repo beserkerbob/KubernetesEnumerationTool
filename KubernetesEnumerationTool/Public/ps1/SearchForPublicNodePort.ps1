@@ -9,6 +9,10 @@ param(
     [Parameter(Mandatory = $true)]
     [boolean] $nmap = $false
     )
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
 
     $nodeInfo = Kubectl get nodes -o json | ConvertFrom-Json
 

@@ -38,6 +38,12 @@ function Get-ServiceAccountPermissions{
         [Parameter(Mandatory = $false)]
         [bool]$DoICreateMasterServiceAccount = $false
     )
+
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
+
     # Your logic for enumerating authorization 
     Write-Output "Enumerating authorization..." -ForegroundColor Yellow
     $namespacesArray = Get-NameSpaceArray

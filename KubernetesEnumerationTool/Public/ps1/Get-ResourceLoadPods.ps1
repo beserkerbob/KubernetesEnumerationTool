@@ -47,7 +47,10 @@ param(
     [Alias("t")]
     [String] $accesstoken
     )
-
+    # Ensure kubectl is available
+    if (Test-KubectlInstalledInPath) {
+        exit
+    }
     if([string]::IsNullOrEmpty($namespace)){
         Write-host "Trying to retrieve resource information for everypod in all namespaces"
         if(Get-CanIExecuteInNamespace -token $accesstoken -command "top pod" -allNamespaces $true){
