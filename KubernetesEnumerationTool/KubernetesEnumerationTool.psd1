@@ -70,7 +70,7 @@ Description = '.\CreateModule.ps1'
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = 'CreateMasterServiceAccount', 'Decode-Jwt', 
-               'Get-FileExtensionsFromVolumesInNodes', 
+               'Get-FileExtensionsFromVolumesInNodes', 'Get-KubernetesConstraints', 
                'Get-KubernetesNetworkPolicy ', 'Get-KubernetesReleaseInfo', 
                'Get-KubernetesSecrets', 'Get-MetaDataInformation', 
                'Get-NamespacesWhereICanPerformAction', 'Get-NodeInformation', 
