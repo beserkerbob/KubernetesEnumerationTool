@@ -46,14 +46,17 @@ Function FormatTableAnalyzingResource  {
         [string] $title,
         # Parameter tekst is required and explains why this best practische should be implemented 
         [Parameter(Mandatory = $true)]
-        [string] $properties
+        [string] $properties,
+        # Parameter tekst is required and explains why this best practische should be implemented 
+        [Parameter(Mandatory = $false)]
+        [string] $positivitiy = " "
     ) 
     # Output some information about the pod 
     if ($podInformation.Count -eq 0) {
         Write-Host "All running pods have $title."-ForegroundColor Green
     } else {
         $trimmedVariable = $title -replace ' ', ''
-        Write-Host "The following pods don't have $title :" -ForegroundColor Red
+        Write-Host "The following pods$positivitiy have $title :" -ForegroundColor Red
         $podInformation | Format-Table -Property @property -AutoSize
         $podInformation | Format-Table -Property $property -AutoSize | Out-File -FilePath "AnalyzingPodResource$trimmedVariable.txt"
         Write-Host "The above pods don't have a $title : "

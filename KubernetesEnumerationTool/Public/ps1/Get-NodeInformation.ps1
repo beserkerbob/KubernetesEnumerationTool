@@ -42,10 +42,12 @@ foreach ($line in $nodesDescription) {
         $line -match "beta.kubernetes.io/instance-type=" -or
         $line -match "beta.kubernetes.io/os=" -or
         $line -match "kubernetes.azure.com/mode=" -or
-        $line -match "kubernetes.io/hostname=") {
+        $line -match "kubernetes.io/hostname=" -or
+        $line -match "Kernel Version" -or
+        $line -match "OS Image") 
+            {
         $extractedInfo += $line.Trim()
     }
-
     # Check for the start of the "Allocated resources" section
     if ($line -match "Allocated resources:") {
         $inAllocatedResourcesSection = $true
@@ -65,5 +67,7 @@ foreach ($line in $nodesDescription) {
 }
 
 # Output the extracted information
+Write-Host ""
+Write-Host ""
 $extractedInfo | ForEach-Object { Write-Output $_ }
 }

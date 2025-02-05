@@ -44,7 +44,10 @@ Function Perform-SearchSecrets{
                         Write-Host "The raw Base64 decoded value of the following key: value pare $key ="
                         $decodedToken = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$value"))
                         Write-Host "$decodedToken" -ForegroundColor Green
-                        Test-AccessTokenPermissions -access_token $decodedToken -namespace $givenNamespace
+                        $namespacesArray = Get-NameSpaceArray
+                        foreach ($namespace in $namespacesArray) {
+                            Test-AccessTokenPermissions -access_token $decodedToken -namespace $namespace
+                        }
                     }
                 }
             }

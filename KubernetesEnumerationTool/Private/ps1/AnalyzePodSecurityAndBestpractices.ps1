@@ -44,6 +44,10 @@ Function AnalyzePodSecurityAndBestPractices{
     $podsWithoutRunAsUser = @()
     #Create a list to hold pods which didn't have set Allowprivilegesescaltion to false 
 
+    $podsWithhostPID = @()
+    $podsWithhostIPC = @()
+    $podsWithhostNetwork = @()
+
     $podsAllowingPrivilegeEscalation = @()
 
     $podsNotEnforcingReadOnlyFileSystem = @()
@@ -55,7 +59,7 @@ Function AnalyzePodSecurityAndBestPractices{
 
     $podsWithSpecificCapabilities= @()
     $podsWithNoRamAndCPULimits= @()
-
+    $podsHasSensitiveMountPath = @()
     $podsWithNoSeccompProfile = @()
 
     $podsWithoutAppArmor = @()
@@ -69,6 +73,10 @@ Function AnalyzePodSecurityAndBestPractices{
         $hasNoCpuLimit = $true
         $hasNoRamLimit = $true   
         $hasSeccompProfile = $false
+        $hashostIPC = $false
+        $hashostNetwork = $false
+        $hashostPID = $false
+
         $podNamespace = $pod.metadata.namespace
         $podName = $pod.metadata.name
 
@@ -93,6 +101,15 @@ Function AnalyzePodSecurityAndBestPractices{
         # Check pod-level security context
         if ($pod.spec.securityContext -and $pod.spec.securityContext.runAsUser) {
             $hasRunAsUser = $true
+        }
+        if($pod.spec.hostIPC){
+            $hashostIPC = $true
+        }
+        if($pod.spec.hostNetwork){
+            $hashostNetwork = $true
+        }
+        if($pod.spec.hostPID){
+            $hashostPID = $true
         }
         if (-not $pod.metadata.ownerReferences) {
             # If there are no owner references, it's orphaned
@@ -142,6 +159,16 @@ Function AnalyzePodSecurityAndBestPractices{
                 $podsAllowingPrivileged += [PSCustomObject]@{
                     PodName   = $podName
                     Namespace = $podNamespace
+                }
+            }
+            #search for sensitive serviceAccount mappings
+            foreach($volumeMount in $container.volumeMounts){
+                if($volumeMount.mountPath -eq "/var/run/secrets/kubernetes.io/serviceaccount"){
+                    $podsHasSensitiveMountPath += [PSCustomObject]@{
+                        PodName   = $podName
+                        Namespace = $podNamespace
+                        MountPath = $volumeMount.mountPath
+                    }
                 }
             }
             # Set flags to false if limits are found
@@ -224,6 +251,27 @@ Function AnalyzePodSecurityAndBestPractices{
             # Check for CPU and RAM limits
 
         }
+        # If the pod and its containers does have hostIPC, add to the list
+        if ($hashostIPC) {
+            $podsWithhostIPC += [PSCustomObject]@{
+                PodName   = $podName
+                Namespace = $podNamespace
+            }
+        }
+        # If the pod and its containers does have HostNetwork, add to the list
+        if ($hashostNetwork) {
+            $podsWithhostNetwork += [PSCustomObject]@{
+                PodName   = $podName
+                Namespace = $podNamespace
+            }
+        }
+        # If the pod and its containers does have hashostPID, add to the list
+        if ($hashostPID) {
+            $podsWithhostPID += [PSCustomObject]@{
+                PodName   = $podName
+                Namespace = $podNamespace
+            }
+        }
             # If the pod and its containers do not have runAsUser, add to the list
         if (-not $hasRunAsUser) {
             $podsWithoutRunAsUser += [PSCustomObject]@{
@@ -257,33 +305,39 @@ Function AnalyzePodSecurityAndBestPractices{
         }
     }
     
-    FormatTableAnalyzingResource -title "No AppArmor" -podInformation $podsWithoutAppArmor -properties "PodName, Namespace" -tekst "They included no Apparmor, AppArmor provides mandatory access controls to restrict program capabilities. reducing the risk of vulnerabilities."
+    FormatTableAnalyzingResource -title "No AppArmor" -positivitiy " Don't" -podInformation $podsWithoutAppArmor -properties "PodName, Namespace" -tekst "They included no Apparmor, AppArmor provides mandatory access controls to restrict program capabilities. reducing the risk of vulnerabilities."
 
-    FormatTableAnalyzingResource -title "No SeccompProfile" -podInformation $podsWithNoSeccompProfile -properties "PodName, Namespace" -tekst "They included no seccomprofile, seccomprofile enhances Kubernetes pod security by restricting system calls that containers can make to the kernel, reducing the risk of vulnerabilities."
+    FormatTableAnalyzingResource -title "No SeccompProfile" -positivitiy " Don't" -podInformation $podsWithNoSeccompProfile -properties "PodName, Namespace" -tekst "They included no seccomprofile, seccomprofile enhances Kubernetes pod security by restricting system calls that containers can make to the kernel, reducing the risk of vulnerabilities."
 
-    FormatTableAnalyzingResource -title "Limits for CPU and RAM" -podInformation $podsWithNoRamAndCPULimits -properties "PodName, Namespace, CPULimits, MemoryLimits" -tekst "They included no limits for CPU or RAM which is a bad practisch and could result in resource starvation"
+    FormatTableAnalyzingResource -title "Limits for CPU and RAM" -positivitiy " Don't"-podInformation $podsWithNoRamAndCPULimits -properties "PodName, Namespace, CPULimits, MemoryLimits" -tekst "They included no limits for CPU or RAM which is a bad practisch and could result in resource starvation"
 
-    FormatTableAnalyzingResource -title "save Capabilities" -podInformation $podsWithSpecificCapabilities -properties "PodName, Namespace, Capabilities" -tekst "They included one of the following dangerous capabilities BPF, DAC_READ_SEARCH, NET_Admin, Sys_admin, Sys_boot, Sys_module, Sys-PTRACE, Sys_RawIO, Syslog"
+    FormatTableAnalyzingResource -title "save Capabilities" -positivitiy " Don't" -podInformation $podsWithSpecificCapabilities -properties "PodName, Namespace, Capabilities" -tekst "They included one of the following dangerous capabilities BPF, DAC_READ_SEARCH, NET_Admin, Sys_admin, Sys_boot, Sys_module, Sys-PTRACE, Sys_RawIO, Syslog"
 
-    FormatTableAnalyzingResource -title "Not having limits implemented" -podInformation $podsNotHavingLimits -properties "PodName, Namespace, Image" -tekst "You should always drop limits in combination with resources to be sure that a pod can't cause resource starvation "
+    FormatTableAnalyzingResource -title "Not having limits implemented" -positivitiy " Don't" -podInformation $podsNotHavingLimits -properties "PodName, Namespace, Image" -tekst "You should always drop limits in combination with resources to be sure that a pod can't cause resource starvation "
 
-    FormatTableAnalyzingResource -title "Not dropping all capabilities" -podInformation $podsNotDroppingAllCapabilities -properties "PodName, Namespace, Image" -tekst "You should always drop all capabilities of a  pods to be sure that least privileged is implemented. Now the team needs to implement themself which capabilities should be added"
+    FormatTableAnalyzingResource -title "Not dropping all capabilities" -positivitiy " Don't" -podInformation $podsNotDroppingAllCapabilities -properties "PodName, Namespace, Image" -tekst "You should always drop all capabilities of a  pods to be sure that least privileged is implemented. Now the team needs to implement themself which capabilities should be added"
 
-    FormatTableAnalyzingResource -title "Allowing privileged containers" -podInformation $podsAllowingPrivileged -properties "PodName, Namespace, Image" -tekst "You should always make that pods are not running as root. This should be enforced using this property"
+    FormatTableAnalyzingResource -title "Allowing privileged containers" -positivitiy " Don't"  -podInformation $podsAllowingPrivileged -properties "PodName, Namespace, Image" -tekst "You should always make that pods are not running as root. This should be enforced using this property"
 
-    FormatTableAnalyzingResource -title "not implemented readonlyfilesystem" -podInformation $podsNotEnforcingReadOnlyFileSystem -properties "PodName, Namespace, Image" -tekst "You should always make that pods are bound to an readonly file system to block some specific explotation paths"
+    FormatTableAnalyzingResource -title "not implemented readonlyfilesystem" -positivitiy " Don't"-podInformation $podsNotEnforcingReadOnlyFileSystem -properties "PodName, Namespace, Image" -tekst "You should always make that pods are bound to an readonly file system to block some specific explotation paths"
 
-    FormatTableAnalyzingResource -title "AllowPrivilegeEscalation" -podInformation $podsAllowingPrivilegeEscalation -properties "PodName, Namespace, Image" -tekst "You should always make sure that pods are not allowed to escalate privileges."
+    FormatTableAnalyzingResource -title "AllowPrivilegeEscalation" -positivitiy " Don't" -podInformation $podsAllowingPrivilegeEscalation -properties "PodName, Namespace, Image" -tekst "You should always make sure that pods are not allowed to escalate privileges."
 
-    FormatTableAnalyzingResource -title "a proper tag and use the'latest' tag." -podInformation $podsUsingLatest -properties "PodName, Namespace, Image" -tekst "You should avoid using the :latest tag when deploying containers in production as it is harder to track which version of the image is running and more difficult to roll back properly."
+    FormatTableAnalyzingResource -title "a proper tag and use the'latest' tag." -positivitiy " Do" -podInformation $podsUsingLatest -properties "PodName, Namespace, Image" -tekst "You should avoid using the :latest tag when deploying containers in production as it is harder to track which version of the image is running and more difficult to roll back properly."
 
-    FormatTableAnalyzingResource -title "orphaned pods" -podInformation $orphanedPods -properties "PodName, Namespace" -tekst "therefor will not be rescheduled in the event of a node failure Make sure they are deployed through a Replicaset or Deployment"
+    FormatTableAnalyzingResource -title "orphaned pods" -positivitiy " Do"  -podInformation $orphanedPods -properties "PodName, Namespace" -tekst "therefor will not be rescheduled in the event of a node failure Make sure they are deployed through a Replicaset or Deployment"
 
-    FormatTableAnalyzingResource -title "readiness probes" -podInformation $podsWithoutReadinessProbe -properties "PodName, Namespace, Container" -tekst "therefor it is possible that traffic is already reaching the application before the pod is completly functioning resulting in unexpected behaviour"
+    FormatTableAnalyzingResource -title "readiness probes" -positivitiy " Don't" -podInformation $podsWithoutReadinessProbe -properties "PodName, Namespace, Container" -tekst "therefor it is possible that traffic is already reaching the application before the pod is completly functioning resulting in unexpected behaviour"
 
-    FormatTableAnalyzingResource -title "Startup probes" -podInformation $podsWithoutStartupProbe -properties "PodName, Namespace, Container" -tekst "Startup probe allow to delay the initial check by liveness which could cause deadlock or wrong result"
+    FormatTableAnalyzingResource -title "Startup probes" -positivitiy " Don't" -podInformation $podsWithoutStartupProbe -properties "PodName, Namespace, Container" -tekst "Startup probe allow to delay the initial check by liveness which could cause deadlock or wrong result"
 
-    FormatTableAnalyzingResource -title "pre-stop" -podInformation $podsWithoutPreStop -properties "PodName, Namespace, Container" -tekst " therefor they aren't gracefully terminated When applicable, use pre-stop hooks to ensure graceful termination of a container" 
+    FormatTableAnalyzingResource -title "pre-stop" -positivitiy " Don't" -podInformation $podsWithoutPreStop -properties "PodName, Namespace, Container" -tekst " therefor they aren't gracefully terminated When applicable, use pre-stop hooks to ensure graceful termination of a container" 
 
-    FormatTableAnalyzingResource -title "runAsUser" -podInformation $podsWithoutRunAsUser -properties "PodName, Namespace, Container" -tekst "as a security context" 
+    FormatTableAnalyzingResource -title "runAsUser" -positivitiy " Don't" -podInformation $podsWithoutRunAsUser -properties "PodName, Namespace, Container" -tekst "It is important to implement a correct usage of runasUser to make sure the user isn't running as a standard privileged user (below 1000)" 
+
+    FormatTableAnalyzingResource -title "Pod With HostPID" -positivitiy " Do" -podInformation $podsWithhostPID -properties "PodName, Namespace, Container" -tekst "When the HostPID is enabled pod containers can share the host process ID namespace" 
+    FormatTableAnalyzingResource -title "Pod With HostIPC" -positivitiy " Do"-podInformation $podsWithhostIPC -properties "PodName, Namespace, Container" -tekst "When the HostIPC is enabled the pod containers can share the host IPC namespace" 
+    FormatTableAnalyzingResource -title "Pod With Host Network" -positivitiy " Do"-podInformation $podsWithhostNetwork -properties "PodName, Namespace, Container" -tekst "When the HostNetwork is enabled the pod can use the node network namespace" 
+    FormatTableAnalyzingResource -title "Pod With Sensitive Mount path" -positivitiy " Do" -podInformation $podsHasSensitiveMountPath -properties "PodName, Namespace, mountPath" -tekst "We found a serviceAccount token mapping as a volumeMount. This could result in leaking of access tokens which can be used to further analyse the system"
+    
 }

