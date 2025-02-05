@@ -77,7 +77,8 @@ FunctionsToExport = 'CreateMasterServiceAccount', 'Decode-Jwt',
                'Get-PodBestPracticeAnalysis', 'Get-RBAC', 'Get-ResourceLoadPods', 
                'Get-ResourceQuotas', 'Get-SensitiveInformationFromNode', 
                'Get-ServiceAccountPermissions', 'SearchForOldImages', 
-               'SearchForPublicNodePort', 'Test-ExploitabilityToNode'
+               'SearchForPublicNodePort', 'Test-ExploitabilityToNode', 
+               'Test-KubernetesDOS'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
