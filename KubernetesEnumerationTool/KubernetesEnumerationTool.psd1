@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = '2024 by Bob van der Staak'
 
 # Description of the functionality provided by this module
-Description = '.\CreateModule.ps1'
+Description = 'this module is used to get a better understanding on kubernetes. Are there wrong implementations and best practices. which could be implemented and can be used for exploitation'
 
 # Minimum version of the Windows PowerShell engine required by this module
 # PowerShellVersion = ''
