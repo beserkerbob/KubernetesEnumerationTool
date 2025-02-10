@@ -17,12 +17,10 @@ function Get-NamespacesWhereICanPerformAction {
     )
 
     if($action -eq "exec" -and $Resource -eq "pods"){
-        Write-Host "Validating exec pods"
         $Resource = "pods/exec"
         $Action = "get"
     }
     if($action -eq "debug" -and $Resource -eq "nodes"){
-        Write-Host "Validating exec pods"
         $Resource = "nodes/debug"
         $Action = "get"
     }
@@ -35,7 +33,7 @@ function Get-NamespacesWhereICanPerformAction {
     $namespaceList = Get-NameSpaceArray
 
     if (-not $namespaceList) {
-        Write-Output "No namespaces found."
+        Write-Host "No namespaces found."
         return
     }
     # List to store namespaces where the action is allowed

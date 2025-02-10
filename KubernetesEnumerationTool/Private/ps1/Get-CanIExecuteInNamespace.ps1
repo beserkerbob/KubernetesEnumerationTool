@@ -56,22 +56,17 @@ Function Get-CanIExecuteInNamespace{
     if([string]::IsNullOrEmpty($namespace) -and $allNamespaces -eq $false){
         Write-Host "CanIExecute needs to know a namespace or allNamespaces must be set to true"
     }
-    Write-Host "Can i perform kubectl auth can-i $command in namespace:" -ForegroundColor Yellow -NoNewline
-    Write-Host "$namespace"-ForegroundColor Green
-    Write-Debug "Command to use: $command "
     $commandArgs = $command -split ' '
     $canIResult = "no"
     if($allNamespaces){
         # Run the kubectl command and capture the output
         if ([string]::IsNullOrEmpty($token)) {
-            Write-Host "Validating permission without token permissions"
             $canIResult = & "kubectl" "auth" "can-i" @commandArgs "-A"
         }
         else{
             $canIResult = & "kubectl" "auth" "can-i" @commandArgs "--token" $token "-A"
         }
         if ($canIResult -eq "yes") {
-            Write-Host "You have permission to perform $command in all Namespaces" -ForegroundColor Green
             return $true
         }
         return $false

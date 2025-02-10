@@ -56,10 +56,9 @@ function Perform-KubectlExecCommand {
     $commandArgs = $command -split ' '
     if ([string]::IsNullOrEmpty($accesstoken)) {
         Write-Host "Validating permission without token permissions"
-        return kubectl exec -it $pod -n $namespace -- @commandArgs 2>$null 
+        return kubectl exec -it $pod -n $namespace -- @commandArgs 
     } else {
-        Write-Debug "Command arguments: $($commandArgs -join ', ')"
-        Write-Debug "kubectl exec -it $pod -n $namespace --token $token -- $($commandArgs -join ' ')"
-        return kubectl exec -it $pod -n $namespace --token $accesstoken -- @commandArgs 2>$null 
+      Write-Host "Validating permission with token permissions"
+      return kubectl exec -it $pod -n $namespace --token $accesstoken -- @commandArgs 2>$null 
     }
 }
