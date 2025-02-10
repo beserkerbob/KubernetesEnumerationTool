@@ -62,6 +62,8 @@ Function AnalyzePodSecurityAndBestPractices{
     $podsHasSensitiveMountPath = @()
     $podsWithNoSeccompProfile = @()
 
+    $podsStartingcommandWithSudo= @()
+
     $podsWithoutAppArmor = @()
 
     $hasRunAsUser = $false
@@ -136,6 +138,14 @@ Function AnalyzePodSecurityAndBestPractices{
         }
         #Loop trough container level security context 
         foreach ($container in $pod.spec.containers) {
+            if ($container.command -ne $null -and $container.command[0] -eq "sudo") {
+                $podsStartingcommandWithSudo += [PSCustomObject]@{
+                    PodName   = $podName
+                    Namespace = $podNamespace
+                    Container = $container.name
+                }
+            }
+
             #Check For security Context
             if ($container.securityContext -and $container.securityContext.runAsUser) {
                 $hasRunAsUser = $true
@@ -171,6 +181,8 @@ Function AnalyzePodSecurityAndBestPractices{
                     }
                 }
             }
+
+            
             # Set flags to false if limits are found
             if ($container.resources) {
                 if ($container.resources.limits.cpu) {
@@ -339,5 +351,7 @@ Function AnalyzePodSecurityAndBestPractices{
     FormatTableAnalyzingResource -title "Pod With HostIPC" -positivitiy " Do"-podInformation $podsWithhostIPC -properties "PodName, Namespace, Container" -tekst "When the HostIPC is enabled the pod containers can share the host IPC namespace" 
     FormatTableAnalyzingResource -title "Pod With Host Network" -positivitiy " Do"-podInformation $podsWithhostNetwork -properties "PodName, Namespace, Container" -tekst "When the HostNetwork is enabled the pod can use the node network namespace" 
     FormatTableAnalyzingResource -title "Pod With Sensitive Mount path" -positivitiy " Do" -podInformation $podsHasSensitiveMountPath -properties "PodName, Namespace, mountPath" -tekst "We found a serviceAccount token mapping as a volumeMount. This could result in leaking of access tokens which can be used to further analyse the system"
-    
+ 
+    FormatTableAnalyzingResource -title "Pods that starts command with sudo" -positivitiy " Don't" -podInformation $podsStartingcommandWithSudo -properties "PodName, Namespace, Container" -tekst "We found a pod which starts its command at startup with sudo. This is a bad practice and shouldn't be performed"
+
 }

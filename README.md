@@ -70,15 +70,18 @@ Now the following functions are available:
 
 ## Future Plans Include
 
-- Expansion to AWS and k3s platforms.
-- Transition from `kubectl` usage to API integrations.
-- Rewriting in Go to enhance performance.
-- Making the application more robust.
-- For metadata endpoint search for lolbins which can be used to retrieve information from already deployed pods (limits the need of pod create rights / and delete for cleanup)
-- Include other exploit techniques like patching a pod etc.
-- Writing different formats for yaml for jobs, cronjobs based and use based on the given privileges.
-- implement also validating the use of ValidatingAdmissionPolicy
-- Implement advice and example configurations which would help secure the system
+- [ ] Expansion to AWS and k3s platforms.
+- [ ] Transition from `kubectl` usage to API integrations.
+- [ ] Rewriting in Go to enhance performance.
+- [ ] Making the application more robust.
+- [ ] For metadata endpoint search for lolbins which can be used to retrieve information from already deployed pods (limits the need of pod create rights / and delete for cleanup)
+- [ ] Include other exploit techniques like patching a pod etc.
+- [ ] Writing different formats for yaml for jobs, cronjobs based and use based on the given privileges.
+- [ ] implement also validating the use of ValidatingAdmissionPolicy
+- [ ] Implement advice and example configurations which would help secure the system
+- [ ] Validate the anonymous authentication property kubelet.
+- [ ] Create an option to enable anonymous authentication (based on: https://github.com/Azure/AKS/blob/master/examples/kubelet/enable-anonymous-auth-for-non-rbac.yaml)
+ - [x] Find pods which run the start command as sudo.
 
 ## Legal Disclaimer
 This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software. Use this application at your own risk.

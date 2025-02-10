@@ -53,7 +53,7 @@ Function FormatTableAnalyzingResource  {
     ) 
     # Output some information about the pod 
     if ($podInformation.Count -eq 0) {
-        Write-Host "All running pods have $title."-ForegroundColor Green
+        Write-Host "All running pods$positivitiy have $title."-ForegroundColor Green
     } else {
         $trimmedVariable = $title -replace ' ', ''
         Write-Host "The following pods$positivitiy have $title :" -ForegroundColor Red
