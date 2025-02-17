@@ -1,4 +1,4 @@
-Function Get-WhereCanIDeployExecAPod {
+Function Get-ExecutableDeploymentNamespaces {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
