@@ -73,10 +73,10 @@ function Get-FirstitemWhereICanCreateOrExecInANamespace {
 
     
     # Display the result based on the findings
-    if ($actionWithExecAndMaybeDeleteAllowed -ne $null) {
+    if ($actionWithPermissions -ne $null) {
         Write-Host "First action-resource with required permissions:" -ForegroundColor Green
-        $actionWithExecAndMaybeDeleteAllowed
-        return $actionWithExecAndMaybeDeleteAllowed
+        $actionWithPermissions
+        return $actionWithPermissions
     } else {
         Write-Host "No permissions found for the specified conditions." -ForegroundColor Red
         return $null

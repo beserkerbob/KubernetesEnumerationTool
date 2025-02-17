@@ -50,7 +50,7 @@ Function Get-ExecutableDeploymentNamespaces {
 
         $permissionResults += $result
     }
-    Write-Host $permissionResults
+    Write-Host $permissionResults | Format-Table -AutoSize
     # Display the result
     return $permissionResults
 }
