@@ -82,6 +82,13 @@ Now the following functions are available:
 - [ ] Validate the anonymous authentication property kubelet.
 - [ ] Create an option to enable anonymous authentication (based on: https://github.com/Azure/AKS/blob/master/examples/kubelet/enable-anonymous-auth-for-non-rbac.yaml)
  - [x] Find pods which run the start command as sudo.
+ - [ ] find best practices for windows (the windowsOptions, Host Process)
+ - [ ] validate runAsUserName for windows process
+ - [ ] check for shareProcessNamespace
+ - [ ] write advise for user namespace https://kubernetes.io/docs/tasks/configure-pod-container/user-namespaces/
+ - [ ] make use of reverse shell possibilities
+ - [ ] Include PodDisruptionBudget.
+ - [ ]  using kernel modules to breakout / Implement afvide on how to block those (/etc/modprobe.d/kubernetes-blacklist.conf)
 
 ## Legal Disclaimer
 This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software. Use this application at your own risk.

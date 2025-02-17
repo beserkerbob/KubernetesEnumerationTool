@@ -38,6 +38,9 @@ Function RetrieveInformationFromNodeWithDebug{
         Write-Host "Retrieving kubelet:" -ForegroundColor Green
         Write-Host ""
         CatAndWriteinformationFromDebugNode -nodeName $nodeName -namespace $namespace -fileName 'kubelet' -command 'cat /host/etc/default/kubelet'
+        Write-Host "Retrieving instance-data-sensitive cloud.json:" -ForegroundColor Green
+        Write-Host ""
+        CatAndWriteinformationFromDebugNode -nodeName $nodeName -namespace $namespace -fileName 'kubelet' -command 'cat /host/run/cloud-init/instance-data-sensitive.json'
         Write-Host "Retrieving kubeconfig:" -ForegroundColor Green
         Write-Host ""
         CatAndWriteinformationFromDebugNode -nodeName $nodeName -namespace $namespace -fileName 'kubeconfig' -command 'cat /host/var/lib/kubelet/kubeconfig'

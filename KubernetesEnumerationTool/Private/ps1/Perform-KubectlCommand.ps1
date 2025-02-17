@@ -54,8 +54,7 @@ function Perform-KubectlCommand {
         [string]$Token
     )
 
-        # Split extracommand into an array of arguments.
-
+    # Split extracommand into an array of arguments.
     $commandArgs = $ExtraCommand -split ' '
     if ([string]::IsNullOrEmpty($Token) -and [string]::IsNullOrEmpty($Namespace)) {
         Write-Host trying to retrieve information without token permissions

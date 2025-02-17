@@ -1,13 +1,13 @@
 function Get-NamespacesWhereICanPerformAction {
     param(
         [Parameter(Mandatory = $true)]
-        [ValidateSet('get', 'update', 'patch', 'create', 'list', 'exec', 'delete', 'watch', 'debug')]
+        [ValidateSet('get', 'update', 'patch', 'create', 'list', 'exec', 'delete', 'watch', 'debug', 'pods/exec')]
         [Alias("a")]
         [string]$Action,
 
         [Parameter(Mandatory = $true)]
         [Alias("r")]
-        [ValidateSet('pods', 'nodes', 'services', 'namespaces', 'pods/exec', 'nodes/debug')]
+        [ValidateSet('pod', 'pods', 'nodes', 'services', 'namespaces', 'pods/exec', 'deployment',  'nodes/debug', 'statefulset', 'daemonset', 'cronjob', 'job', 'replicationcontroller', 'replicaset')]
         [string]$Resource,
 
         [Parameter(Mandatory = $false)]
@@ -16,11 +16,11 @@ function Get-NamespacesWhereICanPerformAction {
 
     )
 
-    if($action -eq "exec" -and $Resource -eq "pods"){
+    if($Action -eq "exec" -and $Resource -eq "pods"){
         $Resource = "pods/exec"
         $Action = "get"
     }
-    if($action -eq "debug" -and $Resource -eq "nodes"){
+    if($Action -eq "debug" -and $Resource -eq "nodes"){
         $Resource = "nodes/debug"
         $Action = "get"
     }

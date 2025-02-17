@@ -56,7 +56,7 @@ Function Get-MetaDataInformation{
                 # If accesstoken is not provided, call the function without it
                 $runningPod = Perform-KubectlCommand -action "get" -type "pods" -namespace $namespace -extracommand '--field-selector=status.phase=Running --no-headers -o custom-columns"=:metadata.name"'
             }
-            Write-Debug "The Following Running pods wehere found: $runningPod"
+            Write-Debug "The Following Running pods where found: $runningPod"
             foreach($pod in $runningPod){
                 #validate if curl is available
                 if ($PSBoundParameters.ContainsKey('accesstoken') -and $accesstoken) {
@@ -78,6 +78,8 @@ Function Get-MetaDataInformation{
                     # If accesstoken is not provided, call the function without it
                     $metadataData = Perform-KubectlExecCommand -pod $pod -namespace $namespace -command 'curl "http://169.254.169.254/metadata/instance?api-version=2020-10-01" -H Metadata:true -s 2>$null'
                 }
+                #TODO working with something like: 
+                #"exec 3<>/dev/tcp/169.254.169.254/80; echo -e 'GET /metadata/instance?api-version=2020-10-01 HTTP/1.1\r\nHost: 169.254.169.254\r\nMetadata: true\r\n\r\n' >&3; cat <&3"
                 Write-Host $metadataData
                 if ([string]::IsNullOrEmpty($metadataData)) {
                     Write-Host "No metadata information was retrieved on the host, possibly blocked" -ForegroundColor Red
@@ -144,7 +146,7 @@ Function Get-MetaDataInformation{
                     Write-Host "With the xms information you can also try to list te resource which belong to that managedIdenitty in azure With the following command" 
                     Write-Host "az identity list-resources --resource-group <ResourceGroupName> --name <ManagedIdentityName>"
                     Write-Host "Exit function because of results found"
-                    exit;
+                    return;
                 }
             }
         } 
