@@ -76,7 +76,7 @@ Now the following functions are available:
 - [ ] Making the application more robust.
 - [ ] For metadata endpoint search for lolbins which can be used to retrieve information from already deployed pods (limits the need of pod create rights / and delete for cleanup)
 - [ ] Include other exploit techniques like patching a pod etc.
-- [ ] Writing different formats for yaml for jobs, cronjobs based and use based on the given privileges.
+- [x] Writing different formats for yaml for jobs, cronjobs based and use based on the given privileges.
 - [ ] implement also validating the use of ValidatingAdmissionPolicy
 - [ ] Implement advice and example configurations which would help secure the system
 - [ ] Validate the anonymous authentication property kubelet.
@@ -86,7 +86,7 @@ Now the following functions are available:
  - [ ] validate runAsUserName for windows process
  - [ ] check for shareProcessNamespace
  - [ ] write advise for user namespace https://kubernetes.io/docs/tasks/configure-pod-container/user-namespaces/
- - [ ] make use of reverse shell possibilities
+ - [x] make use of reverse shell possibilities
  - [ ] Include PodDisruptionBudget.
  - [ ]  using kernel modules to breakout / Implement afvide on how to block those (/etc/modprobe.d/kubernetes-blacklist.conf)
 
