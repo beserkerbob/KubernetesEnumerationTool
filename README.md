@@ -92,3 +92,12 @@ Now the following functions are available:
 
 ## Legal Disclaimer
 This software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software. Use this application at your own risk.
+
+### Important Notes:
+Ethical Use: The tools and scripts on this website should be used only on systems you own or have explicit permission to test. Unauthorized use of these tools on systems that you do not own or have permission to test is illegal and unethical.
+
+Legal Compliance: Ensure that your use of these tools complies with all relevant laws and regulations in your jurisdiction. The author of this website assumes no responsibility for any legal consequences arising from the use or misuse of these tools.
+
+No Warranty: These tools and scripts are provided “as is”, without warranty of any kind, express or implied. Use them at your own risk. The author does not guarantee that these tools will work as expected or that they are free from bugs or errors.
+
+Responsibility: By using the tools and scripts described on this website, you agree that you are responsible for any consequences that may result from their use. The author is not liable for any damage, loss, or legal issues that may arise from using these tools.
